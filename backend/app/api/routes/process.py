@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 import os
 
+from app.utils.chunking import chunk_text
+from app.services.embedding_service import generate_embeddings
+from app.services.faiss_service import create_faiss_index, save_metadata
 from app.services.pdf_service import extract_text_from_pdf
 from app.services.deepgram_service import transcribe_audio
 
@@ -30,14 +33,16 @@ async def process_file(file_id: str):
     if ext == "pdf":
         text = extract_text_from_pdf(file_path)
 
-        return {"type": "pdf", "text_length": len(text)}
-
-    # Audio/Video
+    # Media
     else:
         result = transcribe_audio(file_path)
+        text = result["transcript"]
 
-        return {
-            "type": "media",
-            "transcript_length": len(result["transcript"]),
-            "sample_words": result["words"][:5],
-        }
+    chunks = chunk_text(text)
+
+    embeddings = generate_embeddings(chunks)
+
+    create_faiss_index(embeddings, file_id)
+    save_metadata(chunks, file_id)
+
+    return {"status": "processed", "chunks": len(chunks)}

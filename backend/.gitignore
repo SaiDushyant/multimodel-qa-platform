@@ -81,3 +81,7 @@ htmlcov/
 # Uploaded Sample documents
 uploads/*
 !uploads/.gitkeep
+
+# Sample faiss_indexes
+faiss_indexes/*
+!faiss_indexes/.gitkeep
