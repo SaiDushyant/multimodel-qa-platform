@@ -1,10 +1,6 @@
 import os
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+from app.config import DEEPGRAM_API_KEY
 
 
 def transcribe_audio(file_path: str):
