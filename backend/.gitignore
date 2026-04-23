@@ -77,3 +77,7 @@ htmlcov/
 
 # Docker (if you add later)
 *.tar
+
+# Uploaded Sample documents
+uploads/*
+!uploads/.gitkeep
