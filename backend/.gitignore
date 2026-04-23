@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.envrc
+.venv/
+env/
+ENV/
+
+# Conda environments
+*.conda
+*.env
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs
+*.log
+
+# SQLite / databases
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Test / coverage
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# Ruff / lint
+.ruff_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# FastAPI specific (optional)
+*.pid
+
+# Docker (if you add later)
+*.tar
