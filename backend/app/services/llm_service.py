@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
-from backend.app.core.config import GROQ_API_KEY
+from app.core.config import GROQ_API_KEY
 
 MODEL = "llama-3.1-8b-instant"
 

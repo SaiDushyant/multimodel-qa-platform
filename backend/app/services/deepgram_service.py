@@ -1,6 +1,6 @@
 import os
 import requests
-from backend.app.core.config import DEEPGRAM_API_KEY
+from app.core.config import DEEPGRAM_API_KEY
 
 
 def transcribe_audio(file_path: str):
