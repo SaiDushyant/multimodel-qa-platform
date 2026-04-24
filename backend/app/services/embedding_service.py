@@ -9,27 +9,18 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-def generate_embeddings(chunks: list[str]):
-    chunks = [c.strip() for c in chunks if c and c.strip()]
+def get_embeddings(texts: list[str]):
+    # Clean input (same spirit as before but safer)
+    texts = [t.strip() for t in texts if t and t.strip()]
 
-    if not chunks:
+    if not texts:
         return []
 
     try:
-        response = client.models.embed_content(model=MODEL, contents=chunks)
+        response = client.models.embed_content(model=MODEL, contents=texts)
+
+        # Keep SAME output format as old function
         return [e.values for e in response.embeddings]
+
     except Exception as e:
         raise Exception(f"Embedding failed: {str(e)}")
-
-
-def embed_query(query: str):
-    query = query.strip()
-    if not query:
-        raise ValueError("Query cannot be empty")
-
-    response = client.models.embed_content(model=MODEL, contents=query)
-
-    if not response.embeddings:
-        raise Exception("No embeddings returned from API")
-
-    return response.embeddings[0].values
