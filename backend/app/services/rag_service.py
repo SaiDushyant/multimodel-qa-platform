@@ -35,8 +35,10 @@ def get_timestamp_for_chunk(chunk, words):
     return None
 
 
-def query_rag(file_id, query, top_k=5):
-    index, chunks = load_index(file_id)
+def query_rag(file_id, query, user_id, top_k=5):
+    unique_id = f"{user_id}_{file_id}"
+
+    index, chunks = load_index(unique_id)
 
     query_embedding = np.array(get_embeddings([query])).astype("float32")
 
@@ -51,7 +53,7 @@ def query_rag(file_id, query, top_k=5):
             "timestamps": [],
         }
 
-    words = load_words_if_available(file_id)
+    words = load_words_if_available(unique_id)
 
     timestamps = [get_timestamp_for_chunk(chunk, words) for chunk in retrieved_chunks]
 
@@ -59,4 +61,8 @@ def query_rag(file_id, query, top_k=5):
 
     answer = call_groq_llm(context, query)
 
-    return {"answer": answer, "sources": retrieved_chunks, "timestamps": timestamps}
+    return {
+        "answer": answer,
+        "sources": retrieved_chunks,
+        "timestamps": timestamps,
+    }

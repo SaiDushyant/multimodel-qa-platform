@@ -12,27 +12,28 @@ UPLOAD_DIR = "uploads"
 INDEX_DIR = "faiss_indexes"
 
 
-def process_file_logic(file_id: str):
+def process_file_logic(file_id: str, user_id: str):
     try:
-        set_status(file_id, "processing")
+        set_status(file_id, user_id, "processing")
+
+        unique_id = f"{user_id}_{file_id}"
 
         # Find file
         files = os.listdir(UPLOAD_DIR)
         target_file = None
 
         for f in files:
-            if f.startswith(file_id):
+            if f.startswith(unique_id):
                 target_file = f
                 break
 
         if not target_file:
-            set_status(file_id, "failed")
-            return {"error": "File not found"}
+            set_status(file_id, user_id, "failed")
+            return {"error": "File not found or unauthorized"}
 
         file_path = os.path.join(UPLOAD_DIR, target_file)
         ext = target_file.split(".")[-1]
 
-        # Extract text
         words = None
 
         if ext == "pdf":
@@ -42,27 +43,25 @@ def process_file_logic(file_id: str):
             text = result["transcript"]
             words = result.get("words", [])
 
-        # Chunking
         chunks = chunk_text(text)
 
         if not chunks:
-            set_status(file_id, "failed")
+            set_status(file_id, user_id, "failed")
             return {"error": "No text extracted from file"}
 
-        # Embeddings
         embeddings = get_embeddings(chunks)
 
-        # Vector DB
-        create_faiss_index(embeddings, file_id)
-        save_metadata(chunks, file_id)
+        # ✅ FIXED HERE
+        create_faiss_index(embeddings, unique_id)
+        save_metadata(chunks, unique_id)
 
         if words:
             os.makedirs(INDEX_DIR, exist_ok=True)
 
-            with open(f"{INDEX_DIR}/{file_id}_words.pkl", "wb") as f:
+            with open(f"{INDEX_DIR}/{unique_id}_words.pkl", "wb") as f:
                 pickle.dump(words, f)
 
-        set_status(file_id, "completed")
+        set_status(file_id, user_id, "completed")
 
         return {
             "status": "processed",
@@ -71,6 +70,5 @@ def process_file_logic(file_id: str):
         }
 
     except Exception as e:
-        set_status(file_id, "failed")
-
+        set_status(file_id, user_id, "failed")
         return {"status": "error", "message": str(e)}

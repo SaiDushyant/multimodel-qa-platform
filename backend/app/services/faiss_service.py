@@ -15,7 +15,6 @@ def create_faiss_index(embeddings, file_id):
 
     index.add(vectors)
 
-    # Save index
     faiss.write_index(index, f"{INDEX_DIR}/{file_id}.index")
 
     return index
