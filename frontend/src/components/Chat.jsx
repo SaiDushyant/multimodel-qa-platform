@@ -15,7 +15,7 @@ function Chat({ fileMeta }) {
 
     const interval = setInterval(async () => {
       const res = await fetch(
-        `http://127.0.0.1:8000/status/${fileMeta.file_id}`,
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/status/${fileMeta.file_id}`,
       );
       const data = await res.json();
 
@@ -35,7 +35,7 @@ function Chat({ fileMeta }) {
     const userMessage = { role: "user", content: query };
     setMessages((prev) => [...prev, userMessage]);
 
-    const res = await fetch("http://127.0.0.1:8000/chat/", {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/chat/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -55,7 +55,7 @@ function Chat({ fileMeta }) {
   };
 
   const fileUrl = fileMeta?.file_id
-    ? `http://127.0.0.1:8000/uploads/${fileMeta.file_id}.${fileMeta.file_type}`
+    ? `${import.meta.env.VITE_BACKEND_BASE_URL}/uploads/${fileMeta.file_id}.${fileMeta.file_type}`
     : null;
 
   return (

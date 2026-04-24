@@ -10,10 +10,13 @@ function Upload({ setFileMeta }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("http://127.0.0.1:8000/upload/", {
-      method: "POST",
-      body: formData,
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/upload/`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
     const data = await res.json();
     setResponse(data);
