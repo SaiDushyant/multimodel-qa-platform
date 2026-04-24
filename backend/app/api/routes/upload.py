@@ -1,7 +1,8 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks
 import os
 import uuid
-from pathlib import Path
+
+from app.services.process_service import process_file_logic  # 👈 import this
 
 router = APIRouter()
 
@@ -10,7 +11,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     file_id = str(uuid.uuid4())
 
     # Get file extension
@@ -24,4 +25,12 @@ async def upload_file(file: UploadFile = File(...)):
         content = await file.read()
         f.write(content)
 
-    return {"file_id": file_id, "filename": filename, "file_type": ext}
+    # 🔥 Trigger background processing
+    background_tasks.add_task(process_file_logic, file_id)
+
+    return {
+        "file_id": file_id,
+        "filename": filename,
+        "file_type": ext,
+        "status": "processing",
+    }
