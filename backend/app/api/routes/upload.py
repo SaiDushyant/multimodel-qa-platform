@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, BackgroundTasks
 import os
 import uuid
 
-from app.services.process_service import process_file_logic  # 👈 import this
+from app.services.process_service import process_file_logic
 
 router = APIRouter()
 
@@ -25,7 +25,6 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         content = await file.read()
         f.write(content)
 
-    # 🔥 Trigger background processing
     background_tasks.add_task(process_file_logic, file_id)
 
     return {
