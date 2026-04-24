@@ -1,4 +1,5 @@
 import os
+import pickle
 
 from app.utils.chunking import chunk_text
 from app.services.embedding_service import get_embeddings
@@ -8,6 +9,7 @@ from app.services.deepgram_service import transcribe_audio
 from app.services.status_store import set_status
 
 UPLOAD_DIR = "uploads"
+INDEX_DIR = "faiss_indexes"
 
 
 def process_file_logic(file_id: str):
@@ -31,11 +33,14 @@ def process_file_logic(file_id: str):
         ext = target_file.split(".")[-1]
 
         # Extract text
+        words = None
+
         if ext == "pdf":
             text = extract_text_from_pdf(file_path)
         else:
             result = transcribe_audio(file_path)
             text = result["transcript"]
+            words = result.get("words", [])
 
         # Chunking
         chunks = chunk_text(text)
@@ -51,9 +56,19 @@ def process_file_logic(file_id: str):
         create_faiss_index(embeddings, file_id)
         save_metadata(chunks, file_id)
 
+        if words:
+            os.makedirs(INDEX_DIR, exist_ok=True)
+
+            with open(f"{INDEX_DIR}/{file_id}_words.pkl", "wb") as f:
+                pickle.dump(words, f)
+
         set_status(file_id, "completed")
 
-        return {"status": "processed", "chunks": len(chunks)}
+        return {
+            "status": "processed",
+            "chunks": len(chunks),
+            "has_timestamps": words is not None,
+        }
 
     except Exception as e:
         set_status(file_id, "failed")

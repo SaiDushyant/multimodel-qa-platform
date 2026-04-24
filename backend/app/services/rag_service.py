@@ -1,7 +1,38 @@
 import numpy as np
+import os
+import pickle
+
 from app.services.faiss_service import load_index
 from app.services.embedding_service import get_embeddings
 from app.services.llm_service import call_groq_llm
+
+
+INDEX_DIR = "faiss_indexes"
+
+
+def load_words_if_available(file_id):
+    path = f"{INDEX_DIR}/{file_id}_words.pkl"
+
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+
+def get_timestamp_for_chunk(chunk, words):
+    if not words:
+        return None
+
+    chunk_words = [w.lower() for w in chunk.split()[:5]]
+
+    for w in words:
+        word_text = w.get("word", "").lower()
+
+        if word_text in chunk_words:
+            return w.get("start", 0)
+
+    return None
 
 
 def query_rag(file_id, query, top_k=5):
@@ -14,10 +45,18 @@ def query_rag(file_id, query, top_k=5):
     retrieved_chunks = [chunks[i] for i in indices[0] if 0 <= i < len(chunks)]
 
     if not retrieved_chunks:
-        return {"answer": "No relevant information found.", "sources": []}
+        return {
+            "answer": "No relevant information found.",
+            "sources": [],
+            "timestamps": [],
+        }
+
+    words = load_words_if_available(file_id)
+
+    timestamps = [get_timestamp_for_chunk(chunk, words) for chunk in retrieved_chunks]
 
     context = "\n\n".join(retrieved_chunks[:top_k])
 
     answer = call_groq_llm(context, query)
 
-    return {"answer": answer, "sources": retrieved_chunks}
+    return {"answer": answer, "sources": retrieved_chunks, "timestamps": timestamps}

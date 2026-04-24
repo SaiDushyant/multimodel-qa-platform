@@ -33,3 +33,13 @@ def load_index(file_id):
         chunks = pickle.load(f)
 
     return index, chunks
+
+
+def load_words(file_id):
+    path = f"{INDEX_DIR}/{file_id}_words.pkl"
+
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "rb") as f:
+        return pickle.load(f)

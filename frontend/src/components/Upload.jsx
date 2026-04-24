@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Upload({ setFileId }) {
+function Upload({ setFileMeta }) {
   const [file, setFile] = useState(null);
   const [response, setResponse] = useState(null);
 
@@ -17,7 +17,7 @@ function Upload({ setFileId }) {
 
     const data = await res.json();
     setResponse(data);
-    setFileId(data.file_id);
+    setFileMeta(data);
   };
 
   return (

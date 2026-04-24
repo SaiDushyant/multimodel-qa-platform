@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
+import Player from "./Player";
 
-function Chat({ fileId }) {
+function Chat({ fileMeta }) {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState([]);
-  const [status, setStatus] = useState("idle"); // 👈 NEW
+  const [status, setStatus] = useState("idle");
+  const [timestamps, setTimestamps] = useState([]);
+  const [activeTimestamp, setActiveTimestamp] = useState(null);
 
-  // 🔄 Poll backend status
   useEffect(() => {
-    if (!fileId) return;
+    if (!fileMeta?.file_id) return;
 
     setStatus("processing");
 
     const interval = setInterval(async () => {
-      const res = await fetch(`http://127.0.0.1:8000/status/${fileId}`);
+      const res = await fetch(
+        `http://127.0.0.1:8000/status/${fileMeta.file_id}`,
+      );
       const data = await res.json();
 
       setStatus(data.status);
@@ -23,10 +27,10 @@ function Chat({ fileId }) {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [fileId]);
+  }, [fileMeta?.file_id]);
 
   const sendMessage = async () => {
-    if (!query || !fileId || status !== "completed") return;
+    if (!query || !fileMeta?.file_id || status !== "completed") return;
 
     const userMessage = { role: "user", content: query };
     setMessages((prev) => [...prev, userMessage]);
@@ -35,7 +39,7 @@ function Chat({ fileId }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        file_id: fileId,
+        file_id: fileMeta.file_id,
         query: query,
       }),
     });
@@ -45,13 +49,19 @@ function Chat({ fileId }) {
     const botMessage = { role: "bot", content: data.answer };
     setMessages((prev) => [...prev, botMessage]);
 
+    setTimestamps(data.timestamps || []);
+
     setQuery("");
   };
 
+  const fileUrl = fileMeta?.file_id
+    ? `http://127.0.0.1:8000/uploads/${fileMeta.file_id}.${fileMeta.file_type}`
+    : null;
+
   return (
     <div className="w-full max-w-xl flex flex-col gap-4">
-      {/* STATUS UI */}
-      {fileId && (
+      {/* STATUS */}
+      {fileMeta?.file_id && (
         <div className="text-sm p-2 rounded bg-gray-100">
           Status:{" "}
           <span
@@ -68,7 +78,7 @@ function Chat({ fileId }) {
         </div>
       )}
 
-      {/* Chat messages */}
+      {/* CHAT */}
       <div className="h-80 overflow-y-auto border p-3 rounded flex flex-col gap-2">
         {messages.map((msg, idx) => (
           <div
@@ -84,7 +94,7 @@ function Chat({ fileId }) {
         ))}
       </div>
 
-      {/* Input */}
+      {/* INPUT */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -107,6 +117,33 @@ function Chat({ fileId }) {
           Send
         </button>
       </div>
+
+      {timestamps.length > 0 && (
+        <div className="mt-4">
+          <p className="font-bold">Relevant Moments:</p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {timestamps.map((t, i) =>
+              t !== null ? (
+                <button
+                  key={i}
+                  onClick={() => setActiveTimestamp(t)}
+                  className="bg-purple-500 text-white px-3 py-1 rounded text-sm"
+                >
+                  {t.toFixed(2)}s
+                </button>
+              ) : null,
+            )}
+          </div>
+        </div>
+      )}
+
+      {fileUrl && timestamps.some((t) => t !== null) && (
+        <Player
+          fileUrl={fileUrl}
+          fileType={fileMeta.file_type}
+          activeTimestamp={activeTimestamp}
+        />
+      )}
     </div>
   );
 }

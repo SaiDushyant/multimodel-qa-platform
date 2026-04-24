@@ -1,5 +1,5 @@
 from google import genai
-from app.config import GEMINI_API_KEY
+from backend.app.core.config import GEMINI_API_KEY
 
 MODEL = "models/gemini-embedding-001"
 
