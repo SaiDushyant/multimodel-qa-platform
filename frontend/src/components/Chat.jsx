@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Player from "./Player";
+import { getAuthToken } from "../lib/getToken";
 
 function Chat({ fileMeta }) {
   const [query, setQuery] = useState("");
@@ -13,18 +14,31 @@ function Chat({ fileMeta }) {
 
     setStatus("processing");
 
-    const interval = setInterval(async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/status/${fileMeta.file_id}`,
-      );
-      const data = await res.json();
+    let interval;
 
-      setStatus(data.status);
+    const startPolling = async () => {
+      const token = await getAuthToken();
 
-      if (data.status === "completed" || data.status === "failed") {
-        clearInterval(interval);
-      }
-    }, 2000);
+      interval = setInterval(async () => {
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/status/${fileMeta.file_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await res.json();
+        setStatus(data.status);
+
+        if (data.status === "completed" || data.status === "failed") {
+          clearInterval(interval);
+        }
+      }, 2000);
+    };
+
+    startPolling();
 
     return () => clearInterval(interval);
   }, [fileMeta?.file_id]);
@@ -35,9 +49,14 @@ function Chat({ fileMeta }) {
     const userMessage = { role: "user", content: query };
     setMessages((prev) => [...prev, userMessage]);
 
+    const token = await getAuthToken();
+
     const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/chat/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         file_id: fileMeta.file_id,
         query: query,
@@ -50,7 +69,6 @@ function Chat({ fileMeta }) {
     setMessages((prev) => [...prev, botMessage]);
 
     setTimestamps(data.timestamps || []);
-
     setQuery("");
   };
 
@@ -118,6 +136,7 @@ function Chat({ fileMeta }) {
         </button>
       </div>
 
+      {/* TIMESTAMPS */}
       {timestamps.length > 0 && (
         <div className="mt-4">
           <p className="font-bold">Relevant Moments:</p>
@@ -137,6 +156,7 @@ function Chat({ fileMeta }) {
         </div>
       )}
 
+      {/* VIDEO PLAYER */}
       {fileUrl && timestamps.some((t) => t !== null) && (
         <Player
           fileUrl={fileUrl}

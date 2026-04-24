@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAuthToken } from "../lib/getToken";
 
 function Upload({ setFileMeta }) {
   const [file, setFile] = useState(null);
@@ -10,10 +11,15 @@ function Upload({ setFileMeta }) {
     const formData = new FormData();
     formData.append("file", file);
 
+    const token = await getAuthToken();
+
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_BASE_URL}/upload/`,
       {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       },
     );
