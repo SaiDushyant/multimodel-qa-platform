@@ -6,7 +6,19 @@ An end-to-end AI application that allows users to upload PDFs, audio, and video 
 
 ## 🚀 Live Demo
 
-> https://multimodel-qa-platform.vercel.app/
+👉 https://multimodel-qa-platform.vercel.app/
+
+---
+
+## 📸 Demo Screenshots
+
+### 🔐 Authentication UI
+
+![Authentication](./assets/login.png)
+
+### 💬 Chat with Uploaded File
+
+![Chat Interface](./assets/chat.png)
 
 ---
 
@@ -14,44 +26,44 @@ An end-to-end AI application that allows users to upload PDFs, audio, and video 
 
 ### 🔐 Authentication
 
-* User authentication powered by Supabase
-* Secure JWT-based API access
-* User-specific file isolation
+- User authentication powered by Supabase
+- Secure JWT-based API access
+- User-specific file isolation
 
 ### 📂 File Handling
 
-* Upload support for:
+- Upload support for:
+  - PDFs
+  - Audio files (MP3)
+  - Video files (MP4)
 
-  * PDFs
-  * Audio files (MP3)
-  * Video files (MP4)
-* Drag-and-drop UI with modern UX
-* File processing status tracking
+- Drag-and-drop UI with modern UX
+- File processing status tracking
 
 ### 🧠 AI-Powered RAG
 
-* Document chunking and embedding
-* FAISS-based vector similarity search
-* Context-aware question answering
+- Document chunking and embedding
+- FAISS-based vector similarity search
+- Context-aware question answering
 
 ### 💬 Chat Experience
 
-* ChatGPT-like interface
-* Enter-to-send interaction
-* Streaming-like response rendering (simulated typing)
-* Conversation history
+- ChatGPT-like interface
+- Enter-to-send interaction
+- Streaming-like response rendering (simulated typing)
+- Conversation history
 
 ### ⏱️ Timestamp Retrieval (Key Feature)
 
-* Extract timestamps using Deepgram
-* Map answers to relevant audio/video segments
-* Click-to-seek playback
+- Extract timestamps using Deepgram
+- Map answers to relevant audio/video segments
+- Click-to-seek playback
 
 ### 🎥 Media Playback
 
-* Integrated video/audio player
-* Jump to exact relevant timestamps
-* Seamless AI + media interaction
+- Integrated video/audio player
+- Jump to exact relevant timestamps
+- Seamless AI + media interaction
 
 ---
 
@@ -85,32 +97,32 @@ Frontend → Chat + Media Player
 
 ### Frontend
 
-* React (Vite)
-* Tailwind CSS
-* Supabase JS Client
+- React (Vite)
+- Tailwind CSS
+- Supabase JS Client
 
 ### Backend
 
-* FastAPI
-* LangChain (RAG pipeline)
-* FAISS (vector database)
+- FastAPI
+- LangChain (RAG pipeline)
+- FAISS (vector database)
 
 ### AI & APIs
 
-* Groq (LLM inference - LLaMA 3)
-* Google Gemini (embeddings)
-* Deepgram (speech-to-text + timestamps)
+- Groq (LLM inference - LLaMA 3)
+- Google Gemini (embeddings)
+- Deepgram (speech-to-text + timestamps)
 
 ### Storage & Auth
 
-* Supabase (PostgreSQL + Auth)
-* Local storage for FAISS index
+- Supabase (PostgreSQL + Auth)
+- Local storage for FAISS index
 
 ### DevOps
 
-* Docker
-* Render (backend deployment)
-* Vercel (frontend deployment)
+- Docker
+- Render (backend deployment)
+- Vercel (frontend deployment)
 
 ---
 
@@ -177,11 +189,11 @@ npm run dev
 
 ## 🧪 Testing
 
-* Unit tests using `pytest`
-* Mock external APIs for reliability
-* Coverage tracking using `coverage.py`
+- Unit tests using `pytest`
+- Mock external APIs for reliability
+- Coverage tracking using `coverage.py`
 
-*(Add test commands once implemented)*
+_(Add test commands once implemented)_
 
 ---
 
@@ -189,32 +201,32 @@ npm run dev
 
 ### Backend (Render)
 
-* Dockerized FastAPI app
-* Environment variables configured in dashboard
+- Dockerized FastAPI app
+- Environment variables configured in dashboard
 
 ### Frontend (Vercel)
 
-* Auto-deploy from GitHub
-* Environment variables configured
+- Auto-deploy from GitHub
+- Environment variables configured
 
 ---
 
 ## ⚠️ Known Limitations
 
-* FAISS index stored locally (lost on server restart)
-* Streaming is simulated (not true token streaming)
-* Large files may hit API limits
+- FAISS index stored locally (lost on server restart)
+- Streaming is simulated (not true token streaming)
+- Large files may hit API limits
 
 ---
 
 ## 🔮 Future Improvements
 
-* True streaming (SSE/WebSockets)
-* Multi-file knowledge base
-* Supabase storage for FAISS persistence
-* Advanced semantic timestamp alignment
-* File management (rename/delete)
-* Real-time collaboration
+- True streaming (SSE/WebSockets)
+- Multi-file knowledge base
+- Supabase storage for FAISS persistence
+- Advanced semantic timestamp alignment
+- File management (rename/delete)
+- Real-time collaboration
 
 ---
 
@@ -230,10 +242,10 @@ npm run dev
 
 ## ⭐ Acknowledgements
 
-* Groq for ultra-fast LLM inference
-* Deepgram for accurate transcription
-* Supabase for backend infrastructure
-* LangChain for RAG framework
+- Groq for ultra-fast LLM inference
+- Deepgram for accurate transcription
+- Supabase for backend infrastructure
+- LangChain for RAG framework
 
 ---
 
@@ -241,8 +253,8 @@ npm run dev
 
 This project demonstrates:
 
-* End-to-end system design
-* AI integration in real-world applications
-* Full-stack engineering with production mindset
+- End-to-end system design
+- AI integration in real-world applications
+- Full-stack engineering with production mindset
 
 ---
