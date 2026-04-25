@@ -76,35 +76,38 @@ function Chat({ fileMeta }) {
 
     setLoading(false);
 
-    const words = data.answer.split(" ");
+    const words = data.answer.split(" ").filter((w) => w && w !== "undefined");
 
-    // Add empty bot message
     setMessages((prev) => [...prev, { role: "bot", content: "" }]);
 
     let i = 0;
 
     const interval = setInterval(() => {
+      if (i >= words.length) {
+        clearInterval(interval);
+        return;
+      }
+
       setMessages((prev) => {
         const updated = [...prev];
-
         const lastIndex = updated.length - 1;
         const lastMsg = updated[lastIndex];
 
         if (!lastMsg || lastMsg.role !== "bot") return prev;
 
+        const word = words[i];
+
+        if (!word) return prev;
+
         updated[lastIndex] = {
           role: "bot",
-          content: (lastMsg.content || "") + words[i] + " ",
+          content: (lastMsg.content || "") + word + " ",
         };
 
         return updated;
       });
 
       i++;
-
-      if (i >= words.length) {
-        clearInterval(interval);
-      }
     }, 25);
 
     setTimestamps(data.timestamps || []);

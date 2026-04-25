@@ -60,6 +60,7 @@ def query_rag(file_id, query, user_id, top_k=5):
     context = "\n\n".join(retrieved_chunks[:top_k])
 
     answer = call_groq_llm(context, query)
+    answer = answer.replace("undefined", "").strip()
 
     return {
         "answer": answer,
