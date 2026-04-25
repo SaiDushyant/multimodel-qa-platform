@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 function Auth({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSignupPending, setIsSignupPending] = useState(false);
 
   const signUp = async () => {
     const { data, error } = await supabase.auth.signUp({
@@ -11,7 +12,11 @@ function Auth({ setUser }) {
       password,
     });
 
-    if (!error) setUser(data.user);
+    if (!error) {
+      setIsSignupPending(true); // show verification screen
+    } else {
+      console.log(error.message);
+    }
   };
 
   const signIn = async () => {
@@ -21,7 +26,21 @@ function Auth({ setUser }) {
     });
 
     if (!error) setUser(data.user);
+    else console.log(error.message);
   };
+
+  if (isSignupPending) {
+    return (
+      <div className="h-screen flex items-center justify-center flex-col">
+        <h1 className="text-xl font-semibold">
+          Check your email for verification
+        </h1>
+        <p className="text-gray-500 mt-2">
+          We’ve sent a confirmation link to {email}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3 w-80">

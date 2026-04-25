@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Player from "./Player";
 import { getAuthToken } from "../lib/getToken";
 
@@ -8,7 +8,16 @@ function Chat({ fileMeta }) {
   const [status, setStatus] = useState("idle");
   const [timestamps, setTimestamps] = useState([]);
   const [activeTimestamp, setActiveTimestamp] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  const chatEndRef = useRef(null);
+
+  // 🔽 AUTO SCROLL
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  // 🔄 STATUS POLLING
   useEffect(() => {
     if (!fileMeta?.file_id) return;
 
@@ -43,11 +52,14 @@ function Chat({ fileMeta }) {
     return () => clearInterval(interval);
   }, [fileMeta?.file_id]);
 
+  // 💬 SEND MESSAGE
   const sendMessage = async () => {
-    if (!query || !fileMeta?.file_id || status !== "completed") return;
+    if (!query.trim() || !fileMeta?.file_id || status !== "completed") return;
 
     const userMessage = { role: "user", content: query };
     setMessages((prev) => [...prev, userMessage]);
+
+    setLoading(true);
 
     const token = await getAuthToken();
 
@@ -65,6 +77,8 @@ function Chat({ fileMeta }) {
 
     const data = await res.json();
 
+    setLoading(false);
+
     const botMessage = { role: "bot", content: data.answer };
     setMessages((prev) => [...prev, botMessage]);
 
@@ -72,15 +86,32 @@ function Chat({ fileMeta }) {
     setQuery("");
   };
 
+  // ⌨️ ENTER TO SEND
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  // 🎥 FILE URL
   const fileUrl = fileMeta?.file_id
     ? `${import.meta.env.VITE_BACKEND_BASE_URL}/uploads/${fileMeta.file_id}.${fileMeta.file_type}`
     : null;
 
   return (
-    <div className="w-full max-w-xl flex flex-col gap-4">
+    <div className="h-full flex flex-col">
+      {/* HEADER */}
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold">Chat with your file</h2>
+        {fileMeta && (
+          <p className="text-sm text-gray-500 truncate">{fileMeta.filename}</p>
+        )}
+      </div>
+
       {/* STATUS */}
       {fileMeta?.file_id && (
-        <div className="text-sm p-2 rounded bg-gray-100">
+        <div className="text-sm mb-2 px-3 py-2 rounded bg-gray-100">
           Status:{" "}
           <span
             className={
@@ -96,26 +127,35 @@ function Chat({ fileMeta }) {
         </div>
       )}
 
-      {/* CHAT */}
-      <div className="h-80 overflow-y-auto border p-3 rounded flex flex-col gap-2">
+      {/* CHAT AREA */}
+      <div className="flex-1 overflow-y-auto px-2 py-4 flex flex-col gap-4">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`p-2 rounded ${
+            className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
               msg.role === "user"
-                ? "bg-blue-100 self-end"
-                : "bg-gray-100 self-start"
+                ? "bg-blue-500 text-white self-end"
+                : "bg-gray-200 text-gray-800 self-start"
             }`}
           >
             {msg.content}
           </div>
         ))}
+
+        {/* LOADING */}
+        {loading && (
+          <div className="text-gray-500 text-sm animate-pulse">
+            AI is thinking...
+          </div>
+        )}
+
+        <div ref={chatEndRef} />
       </div>
 
-      {/* INPUT */}
-      <div className="flex gap-2">
-        <input
-          type="text"
+      {/* INPUT BAR */}
+      <div className="border-t p-3 bg-white flex items-end gap-2">
+        <textarea
+          rows={1}
           placeholder={
             status !== "completed"
               ? "Processing document..."
@@ -123,14 +163,15 @@ function Chat({ fileMeta }) {
           }
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={status !== "completed"}
-          className="flex-1 border p-2 rounded disabled:bg-gray-200"
+          className="flex-1 resize-none border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
         />
 
         <button
           onClick={sendMessage}
           disabled={status !== "completed"}
-          className="bg-green-500 text-white px-4 rounded disabled:opacity-50"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-blue-600 transition"
         >
           Send
         </button>
@@ -138,15 +179,15 @@ function Chat({ fileMeta }) {
 
       {/* TIMESTAMPS */}
       {timestamps.length > 0 && (
-        <div className="mt-4">
-          <p className="font-bold">Relevant Moments:</p>
+        <div className="mt-3 px-2">
+          <p className="font-semibold text-sm">Relevant Moments</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {timestamps.map((t, i) =>
               t !== null ? (
                 <button
                   key={i}
                   onClick={() => setActiveTimestamp(t)}
-                  className="bg-purple-500 text-white px-3 py-1 rounded text-sm"
+                  className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs hover:bg-purple-600 transition"
                 >
                   {t.toFixed(2)}s
                 </button>
@@ -156,13 +197,15 @@ function Chat({ fileMeta }) {
         </div>
       )}
 
-      {/* VIDEO PLAYER */}
+      {/* PLAYER */}
       {fileUrl && timestamps.some((t) => t !== null) && (
-        <Player
-          fileUrl={fileUrl}
-          fileType={fileMeta.file_type}
-          activeTimestamp={activeTimestamp}
-        />
+        <div className="mt-4">
+          <Player
+            fileUrl={fileUrl}
+            fileType={fileMeta.file_type}
+            activeTimestamp={activeTimestamp}
+          />
+        </div>
       )}
     </div>
   );

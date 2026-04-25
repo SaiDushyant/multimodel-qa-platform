@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
-import Upload from "./components/Upload";
+import Layout from "./components/Layout";
+import FileSidebar from "./components/FileSidebar";
 import Chat from "./components/Chat";
 
 function App() {
@@ -9,12 +10,10 @@ function App() {
   const [fileMeta, setFileMeta] = useState(null);
 
   useEffect(() => {
-    // Get current session
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user || null);
     });
 
-    // Listen for login/logout changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null);
@@ -26,17 +25,22 @@ function App() {
 
   if (!user) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-gray-100">
         <Auth setUser={setUser} />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center gap-8 p-4">
-      <Upload setFileMeta={setFileMeta} user={user} />
+    <Layout
+      sidebar={
+        <FileSidebar
+          setFileMeta={setFileMeta} // ✅ FIXED PROP
+        />
+      }
+    >
       <Chat fileMeta={fileMeta} user={user} />
-    </div>
+    </Layout>
   );
 }
 
