@@ -12,12 +12,10 @@ function Chat({ fileMeta }) {
 
   const chatEndRef = useRef(null);
 
-  // 🔽 AUTO SCROLL
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages]);
 
-  // 🔄 STATUS POLLING
   useEffect(() => {
     if (!fileMeta?.file_id) return;
 
@@ -52,7 +50,6 @@ function Chat({ fileMeta }) {
     return () => clearInterval(interval);
   }, [fileMeta?.file_id]);
 
-  // 💬 SEND MESSAGE
   const sendMessage = async () => {
     if (!query.trim() || !fileMeta?.file_id || status !== "completed") return;
 
@@ -79,14 +76,41 @@ function Chat({ fileMeta }) {
 
     setLoading(false);
 
-    const botMessage = { role: "bot", content: data.answer };
-    setMessages((prev) => [...prev, botMessage]);
+    const words = data.answer.split(" ");
+
+    // Add empty bot message
+    setMessages((prev) => [...prev, { role: "bot", content: "" }]);
+
+    let i = 0;
+
+    const interval = setInterval(() => {
+      setMessages((prev) => {
+        const updated = [...prev];
+
+        const lastIndex = updated.length - 1;
+        const lastMsg = updated[lastIndex];
+
+        if (!lastMsg || lastMsg.role !== "bot") return prev;
+
+        updated[lastIndex] = {
+          role: "bot",
+          content: (lastMsg.content || "") + words[i] + " ",
+        };
+
+        return updated;
+      });
+
+      i++;
+
+      if (i >= words.length) {
+        clearInterval(interval);
+      }
+    }, 25);
 
     setTimestamps(data.timestamps || []);
     setQuery("");
   };
 
-  // ⌨️ ENTER TO SEND
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -94,7 +118,6 @@ function Chat({ fileMeta }) {
     }
   };
 
-  // 🎥 FILE URL
   const fileUrl = fileMeta?.file_id
     ? `${import.meta.env.VITE_BACKEND_BASE_URL}/uploads/${fileMeta.file_id}.${fileMeta.file_type}`
     : null;
@@ -139,6 +162,10 @@ function Chat({ fileMeta }) {
             }`}
           >
             {msg.content}
+            {/* blinking cursor for last bot message */}
+            {loading && idx === messages.length - 1 && (
+              <span className="animate-pulse">|</span>
+            )}
           </div>
         ))}
 
